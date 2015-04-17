@@ -1,0 +1,29 @@
+{
+  "auditUrl": "jdbc:sqlserver://172.16.160.129:1433;databaseName=audit",
+  "auditUser": "audit",
+  "auditPassword": "demouser",
+  "targetUrl": "jdbc:sqlserver://172.16.160.129:1433;databaseName=source",
+  "targetUser": "source",
+  "targetPassword": "demouser",
+  "batchThreshold": 1000,
+  "mappings": [
+    {
+      "sourcePattern": "TEST_([0-9]+)_(Initial|New|Deleted|Update)\\.txt",
+      "sourceId": 1,
+      "dateGroup": 1,
+      "dateFormat": "MMddyyyy",
+      "typeGroup": 2,
+      "parserSeparator": ",",
+      "parserQuotechar": "\"",
+      "parserEscape": "\\",
+      "parserLine": 1,
+      "parserStrictQuotes": false,
+      "parserIgnoreLeadingWhiteSpace": true,
+      "targetTable": "src_test",
+      "targetColumns": [
+        "test_id",
+        "test_value"
+      ]
+    }
+  ]
+}
