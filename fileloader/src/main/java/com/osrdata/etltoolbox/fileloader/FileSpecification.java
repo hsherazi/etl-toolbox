@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -250,12 +251,29 @@ public class FileSpecification {
     /**
      * Inserts record for source file into the audit_file table.
      */
-    private Integer insertAuditFile() {
+    private Integer insertAuditFile() throws SQLException {
         JdbcTemplate template = new JdbcTemplate(auditDs);
-        // TODO: Add support for other database types.
-        Integer fileId = template.queryForObject("select next value for seq_audit", Integer.class);
-        int result =  template.update("insert into audit_file values (?, ?, ?, ?, ?, ?, ?)",
-                new Object[]{fileId, sourceId, sourceFile.getName(), targetTable, etlType, etlDate, "N" });
+        StringBuilder sql = new StringBuilder();
+        Integer fileId = null;
+        int result = 0;
+        String auditUrl = auditDs.getConnection().getMetaData().getURL();
+
+        sql.append("insert into audit_file ");
+        if (auditUrl.indexOf(":sqlserver:") != -1) {
+            sql.append("values (next value for seq_audit, ?, ?, ?, ?, ?, ?)");
+        } else if (auditUrl.indexOf(":oracle:") != -1) {
+            sql.append("values (seq_audit.nextval, ?, ?, ?, ?, ?, ?)");
+        } else if (auditUrl.indexOf(":postgresql:") != -1) {
+            sql.append("values (nextval('seq_audit'), ?, ?, ?, ?, ?, ?)");
+        } else {
+            // If database type is unknown, attempt to insert record letting database set file_id with trigger or identity value.
+            sql.append("(source_id, file_name, table_name, etl_type, etl_date, processed_flag) values (?, ?, ?, ?, ?, ?)");
+        }
+        result = template.update(sql.toString(), new Object[]{sourceId, sourceFile.getName(), targetTable, etlType, etlDate, "N"});
+        if (result > 0) {
+            fileId = selectAuditFile();
+        }
+
         log.debug("\tInsert into audit_file returned " + result + ", fileId " + fileId);
         return fileId;
     }

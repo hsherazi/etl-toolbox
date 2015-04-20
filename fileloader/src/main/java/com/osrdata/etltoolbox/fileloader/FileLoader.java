@@ -26,9 +26,11 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * This class is used to manage loading of delimited source files into target database tables as specified in
@@ -59,24 +61,23 @@ public class FileLoader {
 
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> root = mapper.readValue(new File(commandLine.getOptionValue("spec")), Map.class);
+
         String auditUrl = (String) root.get("auditUrl");
         String auditUser = (String) root.get("auditUser");
         String auditPassword = (String) root.get("auditPassword");
-
         DataSource auditDs = new DriverManagerDataSource(auditUrl, auditUser, auditPassword);
 
         String targetUrl = (String) root.get("targetUrl");
         String targetUser = (String) root.get("targetUser");
         String targetPassword = (String) root.get("targetPassword");
-
         DataSource targetDs = new DriverManagerDataSource(targetUrl, targetUser, targetPassword);
+
         int batchThreshold = (Integer) root.get("batchThreshold");
         List<Object> mappings = (List<Object>) root.get("mappings");
         for (Object mapping : mappings) {
             specs.add(new FileSpecification((Map<String, Object>) mapping, auditDs, targetDs, batchThreshold,
                     replaceExisting, trace));
         }
-
     }
 
     /**

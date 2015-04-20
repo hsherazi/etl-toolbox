@@ -1,0 +1,29 @@
+{
+  "auditUrl": "jdbc:postgresql://localhost:5432/postgres",
+  "auditUser": "audit",
+  "auditPassword": "demouser",
+  "targetUrl": "jdbc:postgresql://localhost:5432/postgres",
+  "targetUser": "source",
+  "targetPassword": "demouser",
+  "batchThreshold": 1000,
+  "mappings": [
+    {
+      "sourcePattern": "TEST_([0-9]+)_(Initial|New|Deleted|Update)\\.txt",
+      "sourceId": 1,
+      "dateGroup": 1,
+      "dateFormat": "MMddyyyy",
+      "typeGroup": 2,
+      "parserSeparator": ",",
+      "parserQuotechar": "\"",
+      "parserEscape": "\\",
+      "parserLine": 1,
+      "parserStrictQuotes": false,
+      "parserIgnoreLeadingWhiteSpace": true,
+      "targetTable": "src_test",
+      "targetColumns": [
+        "test_id",
+        "test_value"
+      ]
+    }
+  ]
+}
