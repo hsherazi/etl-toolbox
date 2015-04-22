@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 
+
 /**
  * This is the main class for the fileloader application and it manages parsing command line arguments, configuring
  * the FileLoader, and calling the load method for the files to be processed.
@@ -114,7 +115,7 @@ public class Main {
      * Prints usage message to STDOUT.
      */
     private static void usage() {
-        System.out.println("Usage: java -jar fileloader.jar -s <specfile>.json (-d <directory> | -f file) [-r] [-t <interval>]");
+        System.out.println("Usage: java fileloader.jar -s <specfile>.json (-d <directory> | -f file) [-r] [-t <interval>]");
         System.out.println("where options include:");
         System.out.println("    -s <specfile>   specification file in JSON format");
         System.out.println("    -d <directory>  directory containing data files to be loaded");
@@ -122,4 +123,5 @@ public class Main {
         System.out.println("    -r              replace data previously loaded from file with the same name");
         System.out.println("    -t <interval>   print trace output of records processed at specified interval");
     }
+
 }

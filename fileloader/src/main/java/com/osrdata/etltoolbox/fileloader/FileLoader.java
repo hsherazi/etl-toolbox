@@ -17,6 +17,7 @@
 package com.osrdata.etltoolbox.fileloader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jodd.util.ClassLoaderUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
@@ -26,11 +27,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * This class is used to manage loading of delimited source files into target database tables as specified in
@@ -38,6 +37,7 @@ import java.util.Properties;
  */
 public class FileLoader {
     private static final Logger log = LogManager.getLogger(FileLoader.class);
+
     private CommandLine commandLine;
     private ArrayList<FileSpecification> specs = new ArrayList<FileSpecification>();
     private boolean replaceExisting;
@@ -77,6 +77,19 @@ public class FileLoader {
         for (Object mapping : mappings) {
             specs.add(new FileSpecification((Map<String, Object>) mapping, auditDs, targetDs, batchThreshold,
                     replaceExisting, trace));
+        }
+
+        // Load database dribers from lib folder.
+        File libDirectory = new File("lib");
+        if (libDirectory.isDirectory()) {
+            File[] jarFiles = libDirectory.listFiles();
+
+            for (File jarFile : jarFiles) {
+                if (jarFile.getName().endsWith(".jar")) {
+                    ClassLoaderUtil.addFileToClassPath(jarFile, this.getClass().getClassLoader());
+                    log.info("Added " + jarFile.getName() + " to classpath");
+                }
+            }
         }
     }
 
